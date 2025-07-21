@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Product Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #111111;
+            --light-gray: #f5f5f7;
+            --primary-color: #4a69bd;
+            --accent-color: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding-bottom: 90px; /* Space for floating bar */
+            scroll-behavior: smooth;
+        }
+
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .interactive:active {
+            transform: scale(0.96);
+            transition: transform 0.1s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 20px 15px;
+            position: sticky;
+            top: 0;
+            background: rgba(253, 253, 253, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .header a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 24px;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-color);
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column; /* Added for vertical alignment of text */
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 24px;
+            color: var(--primary-color);
+            gap: 10px; /* Space between icon and text */
+        }
+        .loading-spinner i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Product Image Gallery */
+        .product-gallery {
+            position: relative;
+            width: 100%;
+            max-height: 450px; /* নতুন: সর্বোচ্চ উচ্চতা সেট করা হলো */
+            overflow: hidden;
+            background-color: var(--light-gray);
+            margin-bottom: 20px;
+            display: flex; /* নতুন: ভেতরের ছবিকে কেন্দ্র করার জন্য */
+            justify-content: center; /* নতুন: ভেতরের ছবিকে কেন্দ্র করার জন্য */
+            align-items: center; /* নতুন: ভেতরের ছবিকে কেন্দ্র করার জন্য */
+        }
+
+        .gallery-main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* নতুন: ছবি পুরোটা দেখাবে, অনুপাত ঠিক রেখে */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .gallery-thumbnails {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background-color: rgba(253, 253, 253, 0.9); /* হালকা ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* আরও স্পষ্ট শ্যাডো */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .gallery-thumbnails::-webkit-scrollbar { display: none; }
+
+        .thumbnail {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .thumbnail.active {
+            border-color: var(--primary-color);
+        }
+
+        /* Product Info */
+        .product-info-section {
+            padding: 0 20px 20px;
+        }
+
+        /* Product Rating - রেটিং স্টার */
+        .product-rating {
+            color: #FFC107; /* গোল্ড কালার */
+            margin-bottom: 10px;
+            font-size: 18px; /* আইকনের সাইজ */
+            display: flex; /* আইকন এবং টেক্সট একই লাইনে রাখার জন্য */
+            align-items: center;
+        }
+        .product-rating i {
+            margin-right: 2px; /* স্টারগুলোর মধ্যে স্পেস */
+        }
+        .product-rating span {
+            color: var(--accent-color); /* হালকা ধূসর */
+            font-size: 14px;
+            margin-left: 8px; /* স্টার এবং টেক্সটের মধ্যে স্পেস */
+            font-weight: 500;
+        }
+
+        .product-title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .product-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        /* Options (Size, Color) */
+        .option-section {
+            margin-bottom: 25px;
+        }
+
+        .option-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-chip {
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .option-chip.selected {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(74, 105, 189, 0.2);
+        }
+
+        /* Description */
+        .description-section {
+            padding: 0 20px 25px;
+        }
+
+        .description-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .product-description {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            max-height: 90px; /* Initial collapsed height for ~3 lines */
+        }
+
+        .product-description.expanded {
+            max-height: 500px; /* Enough to show full content */
+        }
+
+        .read-more-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* Related Products */
+        .related-products-section {
+            padding: 15px 0;
+        }
+
+        .related-products-section h3 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            color: var(--text-color);
+        }
+
+        .related-product-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 5px 20px 20px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .related-product-scroll::-webkit-scrollbar { display: none; }
+
+        .related-product-card {
+            flex: 0 0 160px; /* Slightly smaller for related */
+            cursor: pointer;
+            scroll-snap-align: start;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .related-product-card .img-container {
+            width: 100%;
+            height: 160px;
+            background-color: var(--light-gray);
+            margin-bottom: 10px;
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .related-product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .related-product-card:hover img {
+            transform: scale(1.08);
+        }
+
+        .related-product-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.3;
+            padding: 0 10px;
+            margin-bottom: 5px;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .related-product-card p {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--primary-color);
+            padding: 0 10px 10px;
+        }
+
+        /* Floating Add to Cart Bar */
+        .floating-add-to-cart-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.08);
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .floating-add-to-cart-bar.show {
+            transform: translateY(0);
+        }
+
+        .floating-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .add-to-cart-fixed-btn {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .add-to-cart-fixed-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* Share Button & Favorite Button */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 0 20px;
+            flex-wrap: wrap; /* ছোট স্ক্রিনের জন্য রেসপনসিভ */
+        }
+        .action-buttons button {
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            border: none;
+            border-radius: 12px; /* সামান্য বেশি রাউন্ডেড */
+            padding: 14px 20px; /* প্যাডিং বাড়ানো হলো */
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease; /* সব প্রপার্টিতে ট্রানজিশন */
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* আইকন ও টেক্সটের মধ্যে স্পেস */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* হালকা শ্যাডো */
+        }
+        .action-buttons button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px); /* হোভারে সামান্য উপরে উঠবে */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .action-buttons button i {
+            font-size: 20px;
+        }
+        .action-buttons button.favorite-btn.added {
+            background-color: #ffe6e6; /* হালকা গোলাপী যখন ফেভারিট যোগ হয় */
+            color: #e74c3c; /* গাঢ় লাল */
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.2);
+        }
+        .action-buttons button.favorite-btn.added:hover {
+            background-color: #f7dada; /* হোভারে আরও হালকা গোলাপী */
+            color: #cc3b2d;
+            transform: translateY(-2px);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <header class="header">
+            <a href="./index.html" class="interactive"><i class="ri-arrow-left-line"></i></a>
+            <h1>Product Details</h1>
+            <a href="./cart.html" class="interactive"><i class="ri-shopping-bag-3-line"></i></a>
+        </header>
+
+        <div id="product-details-content">
+            <div class="loading-spinner" id="loadingSpinner">
+                <i class="ri-loader-4-line"></i>
+                <span>Loading product...</span>
+            </div>
+            
+            </div>
+
+    </div>
+
+    <div class="floating-add-to-cart-bar" id="floatingAddToCartBar">
+        <span class="floating-price" id="floatingProductPrice"></span>
+        <button class="add-to-cart-fixed-btn interactive" onclick="addToCartFromDetailsPage()">
+            <i class="ri-shopping-cart-line"></i> Add to Cart
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+            authDomain: "store-2b78c.firebaseapp.com",
+            projectId: "store-2b78c",
+            storageBucket: "store-2b78c.firebasestorage.app",
+            messagingSenderId: "680525107505",
+            appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentProduct = null;
+        let selectedSize = null;
+        let selectedColor = null;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        async function fetchProductDetails(id) {
+            const productDetailsContent = document.getElementById('product-details-content');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.style.display = 'flex'; // Show spinner
+
+            try {
+                const docRef = doc(db, "products", id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    currentProduct = { id: docSnap.id, ...docSnap.data() };
+                    renderProductDetails(currentProduct);
+                    fetchRelatedProducts(currentProduct.category, currentProduct.id);
+                    updateFloatingBarPrice(currentProduct.price);
+                } else {
+                    productDetailsContent.innerHTML = '<p style="text-align:center; padding: 30px; color: #ef4444;">Product not found.</p>';
+                }
+            } catch (error) {
+                console.error("Error fetching product details: ", error);
+                productDetailsContent.innerHTML = '<p style="text-align:center; padding: 30px; color: #ef4444;">Error loading product details.</p>';
+            } finally {
+                loadingSpinner.style.display = 'none'; // Hide spinner
+            }
+        }
+
+        async function fetchRelatedProducts(category, currentProductId) {
+            const productDetailsContent = document.getElementById('product-details-content');
+            const relatedProductsSection = document.createElement('div');
+            relatedProductsSection.className = 'related-products-section';
+            relatedProductsSection.innerHTML = `<h3>আরও দেখুন</h3><div class="related-product-scroll" id="relatedProductsScroll"></div>`;
+            // Ensure this section is added only once or after product details are rendered
+            if (!document.getElementById('relatedProductsScroll')) {
+                productDetailsContent.appendChild(relatedProductsSection);
+            }
+            
+            const relatedProductsScroll = document.getElementById('relatedProductsScroll');
+            if (relatedProductsScroll) { // Check if element exists before manipulating
+                relatedProductsScroll.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Loading related products...</p>';
+            }
+            
+
+            try {
+                const q = query(collection(db, "products"), where("category", "==", category), limit(5));
+                const querySnapshot = await getDocs(q);
+                let html = '';
+                let count = 0;
+                querySnapshot.forEach(docSnap => {
+                    const product = { id: docSnap.id, ...docSnap.data() };
+                    if (product.id !== currentProductId && count < 4) { // Limit to 4 related products, exclude current one
+                        html += `
+                            <div class="related-product-card interactive" onclick="navigateToDetails('${product.id}')">
+                                <div class="img-container">
+                                    <img src="${product.imageUrls[0]}" alt="${product.name}">
+                                </div>
+                                <h4>${product.name}</h4>
+                                <p>৳${product.price.toLocaleString()}</p>
+                            </div>
+                        `;
+                        count++;
+                    }
+                });
+                if (html === '' && relatedProductsScroll) {
+                    relatedProductsScroll.innerHTML = '<p style="text-align:center; width:100%; color:#888;">No related products found.</p>';
+                } else if (relatedProductsScroll) {
+                    relatedProductsScroll.innerHTML = html;
+                }
+            } catch (error) {
+                console.error("Error fetching related products: ", error);
+                if (relatedProductsScroll) {
+                    relatedProductsScroll.innerHTML = '<p style="text-align:center; width:100%; color:#ef4444;">Failed to load related products.</p>';
+                }
+            }
+        }
+
+
+        function renderProductDetails(product) {
+            const productDetailsContent = document.getElementById('product-details-content');
+            productDetailsContent.innerHTML = `
+                <div class="product-gallery">
+                    <img id="mainProductImage" src="${product.imageUrls[0]}" alt="${product.name}" class="gallery-main-image">
+                    <div class="gallery-thumbnails" id="galleryThumbnails">
+                        ${product.imageUrls.map((url, index) => `<img src="${url}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage('${url}', this)">`).join('')}
+                    </div>
+                </div>
+
+                <div class="product-info-section">
+                    <div class="product-rating">
+                        <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-fill"></i>
+                        <span>(4.5 / 5)</span>
+                    </div>
+                    <h2 class="product-title">${product.name}</h2>
+                    <p class="product-price">৳${product.price.toLocaleString()}</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="favorite-btn interactive" id="favoriteBtn" onclick="toggleFavorite('${product.id}')">
+                        <i class="ri-heart-line"></i> Add to Favorites
+                    </button>
+                    <button class="share-btn interactive" onclick="shareProduct('${product.name}', window.location.href)">
+                        <i class="ri-share-line"></i> Share
+                    </button>
+                </div>
+
+                ${product.sizes && product.sizes.length > 0 ? `
+                <div class="option-section">
+                    <h3>Select Size:</h3>
+                    <div class="options-container" id="sizeOptions">
+                        ${product.sizes.map(size => `<span class="option-chip interactive" onclick="selectOption('size', '${size}', this)">${size}</span>`).join('')}
+                    </div>
+                </div>` : ''}
+
+                ${product.colors && product.colors.length > 0 ? `
+                <div class="option-section">
+                    <h3>Select Color:</h3>
+                    <div class="options-container" id="colorOptions">
+                        ${product.colors.map(color => `<span class="option-chip interactive" style="background-color: ${color.toLowerCase()}; color: ${isLightColor(color.toLowerCase()) ? '#333' : '#fff'}; border-color: ${color.toLowerCase() === 'white' ? '#ddd' : color.toLowerCase()};" onclick="selectOption('color', '${color}', this)">${color}</span>`).join('')}
+                    </div>
+                </div>` : ''}
+
+                <div class="description-section">
+                    <h3>Product Description</h3>
+                    <p class="product-description" id="productDescription">${product.description || 'No description available for this product.'}</p>
+                    <button class="read-more-btn" id="readMoreBtn" onclick="toggleDescription()">Read More</button>
+                </div>
+            `;
+            checkFavoriteStatus(product.id);
+            setupDescriptionToggle();
+        }
+
+        function changeMainImage(imageUrl, clickedThumbnail) {
+            document.getElementById('mainProductImage').src = imageUrl;
+            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+            clickedThumbnail.classList.add('active');
+        }
+
+        function selectOption(type, value, element) {
+            const containerId = type === 'size' ? 'sizeOptions' : 'colorOptions';
+            document.querySelectorAll(`#${containerId} .option-chip`).forEach(chip => chip.classList.remove('selected'));
+            element.classList.add('selected');
+
+            if (type === 'size') {
+                selectedSize = value;
+            } else {
+                selectedColor = value;
+            }
+        }
+
+        function toggleDescription() {
+            const description = document.getElementById('productDescription');
+            const readMoreBtn = document.getElementById('readMoreBtn');
+            description.classList.toggle('expanded');
+            if (description.classList.contains('expanded')) {
+                readMoreBtn.textContent = 'Read Less';
+            } else {
+                readMoreBtn.textContent = 'Read More';
+            }
+        }
+
+        function setupDescriptionToggle() {
+            const description = document.getElementById('productDescription');
+            const readMoreBtn = document.getElementById('readMoreBtn');
+            // Check if content overflows to enable read more button
+            if (description.scrollHeight <= description.clientHeight) {
+                readMoreBtn.style.display = 'none';
+            } else {
+                readMoreBtn.style.display = 'block';
+            }
+        }
+
+        // --- Add to Cart Logic ---
+        function addToCartFromDetailsPage() {
+            if (!currentProduct) return;
+
+            // Check if sizes are required and selected
+            if (currentProduct.sizes && currentProduct.sizes.length > 0 && !selectedSize) {
+                alert('দয়া করে একটি সাইজ নির্বাচন করুন।');
+                return;
+            }
+            // Check if colors are required and selected
+            if (currentProduct.colors && currentProduct.colors.length > 0 && !selectedColor) {
+                alert('দয়া করে একটি রঙ নির্বাচন করুন।');
+                return;
+            }
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Check for existing item with same ID, SIZE, and COLOR
+            const existingItem = cart.find(item => 
+                item.id === currentProduct.id && 
+                item.size === (selectedSize || 'N/A') &&
+                item.color === (selectedColor || 'N/A')
+            );
+
+            if (existingItem) {
+                alert('এই পণ্যটি এই সাইজ এবং রঙে ইতিমধ্যেই আপনার কার্টে আছে।');
+                return;
+            } else {
+                cart.push({
+                    id: currentProduct.id,
+                    name: currentProduct.name,
+                    price: currentProduct.price,
+                    image: currentProduct.imageUrls[0],
+                    size: selectedSize || 'N/A',
+                    color: selectedColor || 'N/A'
+                });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert(`${currentProduct.name} আপনার কার্টে যোগ করা হয়েছে!`);
+            // Optionally redirect to cart or show success message
+        }
+
+        function updateFloatingBarPrice(price) {
+            const floatingPriceElement = document.getElementById('floatingProductPrice');
+            floatingPriceElement.textContent = `৳${price.toLocaleString()}`;
+        }
+
+        // --- Favorite Logic ---
+        function toggleFavorite(productId) {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            const index = favorites.indexOf(productId);
+            const favoriteBtn = document.getElementById('favoriteBtn');
+
+            if (index > -1) {
+                // Remove from favorites
+                favorites.splice(index, 1);
+                favoriteBtn.classList.remove('added');
+                favoriteBtn.innerHTML = '<i class="ri-heart-line"></i> Add to Favorites';
+                alert('Favorite থেকে সরানো হয়েছে!');
+            } else {
+                // Add to favorites
+                favorites.push(productId);
+                favoriteBtn.classList.add('added');
+                favoriteBtn.innerHTML = '<i class="ri-heart-fill"></i> Added to Favorites';
+                alert('Favorite-এ যোগ করা হয়েছে!');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        function checkFavoriteStatus(productId) {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            if (favorites.includes(productId)) {
+                favoriteBtn.classList.add('added');
+                favoriteBtn.innerHTML = '<i class="ri-heart-fill"></i> Added to Favorites';
+            } else {
+                favoriteBtn.classList.remove('added');
+                favoriteBtn.innerHTML = '<i class="ri-heart-line"></i> Add to Favorites';
+            }
+        }
+
+        // --- Share Functionality ---
+        function shareProduct(title, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                }).catch(console.error);
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                prompt('Copy this link to share:', url);
+            }
+        }
+
+        // --- Floating Add to Cart Bar Visibility ---
+        const appContainer = document.getElementById('appContainer');
+        const floatingAddToCartBar = document.getElementById('floatingAddToCartBar');
+
+        appContainer.addEventListener('scroll', () => {
+            if (appContainer.scrollTop > 300) { // Show after scrolling 300px down
+                floatingAddToCartBar.classList.add('show');
+            } else {
+                floatingAddToCartBar.classList.remove('show');
+            }
+        });
+
+        // Helper function for color contrast (for text on color chips)
+        function isLightColor(hexColor) {
+            const color = hexColor.startsWith('#') ? hexColor.slice(1) : hexColor;
+            const r = parseInt(color.substr(0, 2), 16);
+            const g = parseInt(color.substr(2, 2), 16);
+            const b = parseInt(color.substr(4, 2), 16);
+            const y = (r * 299 + g * 587 + b * 114) / 1000;
+            return y >= 128;
+        }
+
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (productId) {
+                fetchProductDetails(productId);
+            } else {
+                document.getElementById('product-details-content').innerHTML = '<p style="text-align:center; padding: 30px; color: #ef4444;">No product ID specified.</p>';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        });
+
+        // Make functions globally accessible for onclick attributes
+        window.changeMainImage = changeMainImage;
+        window.selectOption = selectOption;
+        window.toggleDescription = toggleDescription;
+        window.addToCartFromDetailsPage = addToCartFromDetailsPage;
+        window.toggleFavorite = toggleFavorite;
+        window.shareProduct = shareProduct;
+        window.navigateToDetails = (id) => { window.location.href = `./details.html?id=${id}`; }; // For related products
+    </script>
+</body>
+</html>

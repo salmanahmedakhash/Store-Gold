@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #111111;
+            --light-gray: #f5f5f7;
+            --primary-color: #4a69bd;
+            --accent-color: #6c757d;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .app-container {
+            width: 100%;
+            min-height: 100%;
+            overflow-y: auto;
+            padding-bottom: 90px; /* Space for fixed checkout button */
+            scroll-behavior: smooth;
+        }
+
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .interactive:active {
+            transform: scale(0.96);
+            transition: transform 0.1s;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 20px 15px;
+            position: sticky;
+            top: 0;
+            background: rgba(253, 253, 253, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .app-header h1 {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-color);
+        }
+
+        .app-header a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 24px;
+        }
+
+        .checkout-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 10px;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .order-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .order-item-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: var(--light-gray);
+            flex-shrink: 0;
+        }
+        .order-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .order-item-details {
+            flex-grow: 1;
+        }
+        .order-item-details h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+        .order-item-details p {
+            font-size: 13px;
+            color: var(--accent-color);
+            margin-bottom: 3px;
+        }
+        .order-item-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .price-breakdown {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .price-breakdown div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .price-breakdown div span:first-child {
+            color: var(--accent-color);
+        }
+        .price-breakdown div span:last-child {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .price-breakdown .total-payment {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px dashed var(--light-gray);
+        }
+
+        /* Customer Information & Shipping Address */
+        .customer-info, .shipping-address, .payment-method {
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-color);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.2);
+        }
+
+        /* Payment Method */
+        .payment-method .method-option {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-gray);
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .payment-method .method-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 105, 189, 0.1);
+            box-shadow: 0 2px 8px rgba(74, 105, 189, 0.1);
+        }
+        .payment-method .method-option:last-child {
+            margin-bottom: 0;
+        }
+        .payment-method .method-option input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+        .payment-method .method-option label {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0; /* Override default label margin */
+            cursor: pointer;
+        }
+
+        /* Place Order Button */
+        .place-order-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+
+        .place-order-btn {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 18px 25px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .place-order-btn:hover {
+            background-color: var(--primary-color);
+        }
+        .place-order-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* No cart items message */
+        .no-cart-message {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+        .no-cart-message i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        .no-cart-message a {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            padding: 12px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .no-cart-message a:hover {
+            background-color: #3b57a3;
+        }
+        
+        /* Message Box */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        .message-box.error {
+            background-color: var(--error-color);
+        }
+        .message-box.success {
+            background-color: var(--success-color);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <header class="app-header">
+            <a href="./cart.html" class="interactive"><i class="ri-arrow-left-line"></i></a>
+            <h1>Checkout</h1>
+            <a href="./index.html" class="interactive"><i class="ri-home-5-line"></i></a>
+        </header>
+
+        <div id="checkout-content">
+            <div class="no-cart-message" id="emptyCartMessage" style="display: none;">
+                <i class="ri-shopping-cart-line"></i>
+                <p>আপনার কার্ট খালি!</p>
+                <p>চেকআউট করার জন্য কিছু পণ্য যোগ করুন।</p>
+                <a href="./index.html">কেনাকাটা শুরু করুন</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="place-order-bar">
+        <button class="place-order-btn interactive" id="placeOrderBtn" onclick="placeOrder()">
+            Place Order
+            <i class="ri-arrow-right-line"></i>
+        </button>
+    </div>
+
+    <div class="message-box" id="messageBox">
+        <span id="messageIcon"></span>
+        <span id="messageText"></span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+            authDomain: "store-2b78c.firebaseapp.com",
+            projectId: "store-2b78c",
+            storageBucket: "store-2b78c.firebasestorage.app",
+            messagingSenderId: "680525107505",
+            appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let cartItems = [];
+        let subtotal = 0;
+        const shippingFee = 80; // Example fixed shipping fee
+
+        function loadCart() {
+            cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cartItems.length === 0) {
+                document.getElementById('checkout-content').style.display = 'none';
+                document.getElementById('placeOrderBtn').style.display = 'none';
+                document.getElementById('emptyCartMessage').style.display = 'block';
+            } else {
+                document.getElementById('checkout-content').style.display = 'block';
+                document.getElementById('placeOrderBtn').style.display = 'flex';
+                document.getElementById('emptyCartMessage').style.display = 'none';
+                renderCheckoutPage();
+            }
+        }
+
+        function renderCheckoutPage() {
+            const checkoutContent = document.getElementById('checkout-content');
+            subtotal = 0;
+
+            let orderSummaryHtml = `
+                <div class="order-summary">
+                    <h2 class="section-title">Order Summary</h2>
+                    <div class="order-items">
+            `;
+            cartItems.forEach(item => {
+                const itemQuantity = item.quantity || 1;
+                const itemTotalPrice = item.price * itemQuantity;
+                subtotal += itemTotalPrice;
+                orderSummaryHtml += `
+                    <div class="order-item">
+                        <div class="order-item-img">
+                            <img src="${item.image}" alt="${item.name}">
+                        </div>
+                        <div class="order-item-details">
+                            <h4>${item.name} (${itemQuantity}x)</h4>
+                            <p>${item.size !== 'N/A' ? `Size: ${item.size}` : ''} ${item.color !== 'N/A' ? `Color: ${item.color}` : ''}</p>
+                        </div>
+                        <span class="order-item-price">৳${itemTotalPrice.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+            
+            const totalPayment = subtotal + shippingFee;
+
+            orderSummaryHtml += `
+                    </div>
+                    <div class="price-breakdown">
+                        <div>
+                            <span>Subtotal</span>
+                            <span>৳${subtotal.toLocaleString()}</span>
+                        </div>
+                        <div>
+                            <span>Shipping Fee</span>
+                            <span>৳${shippingFee.toLocaleString()}</span>
+                        </div>
+                        <div class="total-payment">
+                            <span>Total Payment</span>
+                            <strong>৳${totalPayment.toLocaleString()}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let customerInfoHtml = `
+                <div class="customer-info">
+                    <h2 class="section-title">Customer Information</h2>
+                    <div class="form-group">
+                        <label for="customerName">Full Name <span style="color:red">*</span></label>
+                        <input type="text" id="customerName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email <span style="color:red">*</span></label>
+                        <input type="email" id="customerEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number <span style="color:red">*</span></label>
+                        <input type="tel" id="customerPhone" placeholder="e.g. 01xxxxxxxxx" required>
+                    </div>
+                </div>
+            `;
+
+            let shippingAddressHtml = `
+                <div class="shipping-address">
+                    <h2 class="section-title">Shipping Address</h2>
+                    <div class="form-group">
+                        <label for="streetAddress">Street Address <span style="color:red">*</span></label>
+                        <input type="text" id="streetAddress" placeholder="e.g. House No, Road No, Area" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City <span style="color:red">*</span></label>
+                        <input type="text" id="city" placeholder="e.g. Dhaka" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stateProvince">State/Province</label>
+                        <input type="text" id="stateProvince" placeholder="e.g. Dhaka Division">
+                    </div>
+                    <div class="form-group">
+                        <label for="zipCode">Zip/Postal Code</label>
+                        <input type="text" id="zipCode" placeholder="e.g. 1200">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country <span style="color:red">*</span></label>
+                        <select id="country" required>
+                            <option value="">Select Country</option>
+                            <option value="Bangladesh">Bangladesh</option>
+                            </select>
+                    </div>
+                </div>
+            `;
+
+            let paymentMethodHtml = `
+                <div class="payment-method">
+                    <h2 class="section-title">Payment Method</h2>
+                    <div class="form-group">
+                        <div class="method-option selected">
+                            <input type="radio" id="cod" name="paymentMethod" value="Cash on Delivery" checked>
+                            <label for="cod">Cash on Delivery (COD)</label>
+                        </div>
+                        </div>
+                </div>
+            `;
+            checkoutContent.innerHTML = orderSummaryHtml + customerInfoHtml + shippingAddressHtml + paymentMethodHtml;
+        }
+
+        async function placeOrder() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerEmail = document.getElementById('customerEmail').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const streetAddress = document.getElementById('streetAddress').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const stateProvince = document.getElementById('stateProvince').value.trim();
+            const zipCode = document.getElementById('zipCode').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            // Basic validation
+            if (!customerName || !customerEmail || !customerPhone || !streetAddress || !city || !country) {
+                showMessage('অনুগ্রহ করে সব প্রয়োজনীয় ফিল্ড পূরণ করুন।', 'error');
+                return;
+            }
+
+            if (!isValidEmail(customerEmail)) {
+                showMessage('একটি সঠিক ইমেল ঠিকানা দিন।', 'error');
+                return;
+            }
+
+            if (!isValidPhoneNumber(customerPhone)) {
+                showMessage('একটি সঠিক ফোন নম্বর দিন (যেমন: ০১৭XXXXXXXXX)।', 'error');
+                return;
+            }
+            
+            if (cartItems.length === 0) {
+                showMessage('আপনার কার্ট খালি। অর্ডার করার জন্য কিছু পণ্য যোগ করুন।', 'error');
+                return;
+            }
+
+            const orderDetails = {
+                customerInfo: {
+                    name: customerName,
+                    email: customerEmail,
+                    phone: customerPhone
+                },
+                shippingAddress: {
+                    street: streetAddress,
+                    city: city,
+                    state: stateProvince,
+                    zipCode: zipCode,
+                    country: country
+                },
+                items: cartItems.map(item => ({
+                    productId: item.id,
+                    name: item.name,
+                    quantity: item.quantity || 1,
+                    price: item.price,
+                    size: item.size || 'N/A',
+                    color: item.color || 'N/A'
+                })),
+                subtotal: subtotal,
+                shippingFee: shippingFee,
+                totalPayment: subtotal + shippingFee,
+                paymentMethod: paymentMethod,
+                orderStatus: "Pending", // Initial status
+                orderDate: serverTimestamp() // Firebase server timestamp
+            };
+
+            document.getElementById('placeOrderBtn').disabled = true;
+            document.getElementById('placeOrderBtn').innerHTML = `<i class="ri-loader-4-line spin"></i> Placing Order...`;
+
+            try {
+                const docRef = await addDoc(collection(db, "orders"), orderDetails);
+                console.log("Order placed with ID: ", docRef.id);
+                localStorage.removeItem('cart'); // Clear cart after successful order
+                showMessage('আপনার অর্ডার সফলভাবে সম্পন্ন হয়েছে! অর্ডার আইডি: ' + docRef.id, 'success');
+                setTimeout(() => {
+                    window.location.href = './index.html'; // Redirect to home or order confirmation page
+                }, 3000); // Redirect after 3 seconds
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage('অর্ডার করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+            } finally {
+                document.getElementById('placeOrderBtn').disabled = false;
+                document.getElementById('placeOrderBtn').innerHTML = `Place Order <i class="ri-arrow-right-line"></i>`;
+            }
+        }
+
+        function isValidEmail(email) {
+            // Basic email regex for format validation
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function isValidPhoneNumber(phone) {
+            // Basic phone number regex for Bangladesh (starting with 01 and 11 digits)
+            const re = /^(01|\+8801)[0-9]{9}$/;
+            return re.test(phone);
+        }
+
+        function showMessage(msg, type) {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            const messageIcon = document.getElementById('messageIcon');
+
+            messageText.textContent = msg;
+            messageBox.classList.remove('success', 'error');
+            messageIcon.className = '';
+
+            if (type === 'success') {
+                messageBox.classList.add('success');
+                messageIcon.classList.add('ri-check-circle-line');
+            } else if (type === 'error') {
+                messageBox.classList.add('error');
+                messageIcon.classList.add('ri-error-warning-line');
+            }
+
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+        });
+
+        // Make functions globally accessible for onclick attributes
+        window.placeOrder = placeOrder;
+    </script>
+</body>
+</html>

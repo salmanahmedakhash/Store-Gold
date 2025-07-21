@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fear of God</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #111111;
+            --light-gray: #f5f5f7;
+            --primary-color: #4a69bd;
+            --accent-color: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding-bottom: 90px;
+            scroll-behavior: smooth;
+        }
+
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .interactive:active {
+            transform: scale(0.96);
+            transition: transform 0.1s;
+        }
+
+        .app-header {
+            padding: 25px 20px 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            background: rgba(253, 253, 253, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .app-header h1 {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-color);
+        }
+
+        /* Search Bar */
+        .search-container {
+            padding: 10px 20px 25px;
+        }
+
+        .search-bar {
+            background-color: var(--light-gray);
+            border-radius: 15px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar.focused {
+            box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .search-bar i {
+            font-size: 22px;
+            color: #9a9a9e;
+            margin-right: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .search-bar.focused i {
+            color: var(--primary-color);
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 17px;
+            width: 100%;
+            color: var(--text-color);
+        }
+
+        /* Hero Slider */
+        .hero-slider-container {
+            padding: 0 20px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            border-radius: 25px;
+            overflow: hidden;
+        }
+
+        .hero-slide {
+            min-width: 100%;
+            display: block;
+        }
+
+        .hero-slide img {
+            width: 100%;
+            border-radius: 25px;
+            display: block;
+        }
+
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #fff;
+            transform: scale(1.2);
+        }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 5;
+            transition: background-color 0.3s ease;
+        }
+
+        .slider-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .arrow-left {
+            left: 30px;
+        }
+
+        .arrow-right {
+            right: 30px;
+        }
+
+
+        /* Category Filter */
+        .category-filter {
+            padding: 0 20px 20px;
+            white-space: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            margin-bottom: 10px;
+        }
+
+        .category-filter::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-chip {
+            display: inline-block;
+            background-color: var(--light-gray);
+            color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-right: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .category-chip.active,
+        .category-chip:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 4px 10px rgba(74, 105, 189, 0.2);
+        }
+
+
+        /* Product Sections */
+        .category-section {
+            padding: 15px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .category-section.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .category-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            color: var(--text-color);
+        }
+
+        .product-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 5px 20px 20px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .product-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .product-card {
+            flex: 0 0 180px;
+            /* cursor: pointer; removed to make individual parts clickable */
+            scroll-snap-align: start;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative; /* Added for add to cart button positioning */
+        }
+
+        .product-card .img-container {
+            width: 100%;
+            height: 180px;
+            background-color: var(--light-gray);
+            margin-bottom: 15px;
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            cursor: pointer; /* Now img-container is clickable */
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: block;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.08);
+        }
+
+        .product-info {
+            padding: 0 15px 15px;
+            position: relative; /* For add to cart button position */
+        }
+
+        .product-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-color);
+            margin-bottom: 5px;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-card p {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-top: 6px;
+        }
+
+        .add-to-cart-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        /* Ensure button is visible when hovering product info (or card) */
+        .product-card:hover .add-to-cart-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+            font-size: 30px;
+            color: #8e8e93;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--text-color);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: 18px;
+            right: 35%;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cart-badge.visible {
+            transform: scale(1);
+        }
+
+        .nav-item .ri-shopping-bag-3-line.cart-added-animation {
+            animation: bounceCart 0.6s ease-out;
+        }
+
+        @keyframes bounceCart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Quick View Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-color);
+        }
+
+        .modal-image-container {
+            width: 100%;
+            height: 250px;
+            background-color: var(--light-gray);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .modal-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-product-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .modal-product-price {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .modal-product-description {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-size-selection {
+            margin-bottom: 20px;
+        }
+        
+        .modal-size-selection label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .size-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .size-option {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .size-option.selected {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(74, 105, 189, 0.2);
+        }
+
+        .modal-add-to-cart-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-add-to-cart-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* Loading Skeleton */
+        .skeleton-section {
+            padding: 15px 0;
+            opacity: 0.7;
+        }
+
+        .skeleton-title {
+            width: 70%;
+            height: 25px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            margin-left: 20px;
+        }
+
+        .skeleton-scroll {
+            display: flex;
+            gap: 20px;
+            padding: 5px 20px 20px;
+        }
+
+        .skeleton-card {
+            flex: 0 0 180px;
+            height: 270px;
+            background-color: var(--light-gray);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { background-color: var(--light-gray); }
+            50% { background-color: #e0e0e0; }
+            100% { background-color: var(--light-gray); }
+        }
+
+        /* Scroll to Top Button */
+        #scrollToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 100px; /* Above bottom nav */
+            right: 20px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 12px 15px;
+            border-radius: 50%;
+            font-size: 22px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #3b57a3;
+            transform: translateY(-3px);
+        }
+
+        /* Network Status Indicator */
+        #network-status {
+            position: fixed;
+            bottom: 90px; /* Above bottom nav */
+            left: 0;
+            width: 100%;
+            background-color: #ffc107;
+            color: #333;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 99;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        #network-status.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <header class="app-header"><h1>Fear of God</h1></header>
+
+        <div class="search-container">
+            <div class="search-bar" id="searchBar">
+                <i class="ri-search-line"></i>
+                <input type="text" placeholder="Search for items...">
+            </div>
+        </div>
+
+        <div class="hero-slider-container">
+            <div class="hero-slider" id="heroSlider">
+                <div class="hero-slide interactive"><img src="https://i.ibb.co/1GWxyBKT/8f421c1a1d0d1abcda9155d53e10b48b.jpg" alt="Collection 1"></div>
+           
+            </div>
+            <div class="slider-dots" id="sliderDots"></div>
+            <button class="slider-arrow arrow-left" id="prevSlide"><i class="ri-arrow-left-s-line"></i></button>
+            <button class="slider-arrow arrow-right" id="nextSlide"><i class="ri-arrow-right-s-line"></i></button>
+        </div>
+
+        <div class="category-filter" id="categoryFilter">
+            <span class="category-chip active" data-category="All">সব</span>
+            </div>
+        
+        <div id="home-products">
+            <div class="skeleton-section">
+                <div class="skeleton-title"></div>
+                <div class="product-scroll skeleton-scroll">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+            <div class="skeleton-section">
+                <div class="skeleton-title"></div>
+                <div class="product-scroll skeleton-scroll">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="./index.html" class="nav-item active interactive"><i class="ri-home-5-fill"></i></a>
+        <a href="./favorites.html" class="nav-item interactive"><i class="ri-heart-3-line"></i></a>
+        <a href="./cart.html" class="nav-item interactive">
+            <i class="ri-shopping-bag-3-line" id="cartBagIcon"></i>
+            <span id="cart-badge" class="cart-badge">0</span>
+        </a>
+        <a href="#" class="nav-item interactive"><i class="ri-user-3-line"></i></a>
+    </nav>
+
+    <div class="modal-overlay" id="quickViewModal">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeQuickViewModal()"><i class="ri-close-line"></i></button>
+            <div class="modal-image-container"><img id="modalProductImage" src="" alt="Product Image"></div>
+            <h3 class="modal-product-name" id="modalProductName"></h3>
+            <p class="modal-product-price" id="modalProductPrice"></p>
+            <p class="modal-product-description" id="modalProductDescription"></p>
+            
+            <div class="modal-size-selection" id="modalSizeSelection">
+                <label>Select Size:</label>
+                <div class="size-options" id="modalSizeOptions">
+                    </div>
+            </div>
+
+            <button class="modal-add-to-cart-btn" onclick="addCurrentProductToCart()">Add to Cart</button>
+        </div>
+    </div>
+
+    <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top"><i class="ri-arrow-up-line"></i></button>
+
+    <div id="network-status">You are currently offline. Please check your internet connection.</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // আপনার Firebase প্রজেক্টের কনফিগারেশন এখানে পেস্ট করুন
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+            authDomain: "store-2b78c.firebaseapp.com",
+            projectId: "store-2b78c",
+            storageBucket: "store-2b78c.firebasestorage.app",
+            messagingSenderId: "680525107505",
+            appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allProducts = [];
+        let allCategories = [];
+        let currentActiveCategory = 'All';
+        let currentModalProduct = null;
+        let selectedProductSize = null;
+
+        // --- Hero Slider Logic ---
+        const heroSlider = document.getElementById('heroSlider');
+        const sliderDots = document.getElementById('sliderDots');
+        const prevSlideBtn = document.getElementById('prevSlide');
+        const nextSlideBtn = document.getElementById('nextSlide');
+        let slideIndex = 0;
+
+        function createDots() {
+            sliderDots.innerHTML = '';
+            Array.from(heroSlider.children).forEach((_, i) => {
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => {
+                    slideIndex = i;
+                    showSlide(slideIndex);
+                });
+                sliderDots.appendChild(dot);
+            });
+        }
+
+        function showSlide(index) {
+            const slides = Array.from(heroSlider.children);
+            const dots = Array.from(sliderDots.children);
+
+            if (index >= slides.length) slideIndex = 0;
+            if (index < 0) slideIndex = slides.length - 1;
+
+            heroSlider.style.transform = `translateX(-${slideIndex * 100}%)`;
+
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === slideIndex);
+            });
+        }
+
+        function nextSlide() {
+            slideIndex++;
+            showSlide(slideIndex);
+        }
+
+        function prevSlide() {
+            slideIndex--;
+            showSlide(slideIndex);
+        }
+
+        let slideInterval = setInterval(nextSlide, 5000); // Auto slide every 5 seconds
+
+        prevSlideBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            prevSlide();
+            slideInterval = setInterval(nextSlide, 5000);
+        });
+
+        nextSlideBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            nextSlide();
+            slideInterval = setInterval(nextSlide, 5000);
+        });
+
+        // --- Fetching Products and Categories ---
+        async function fetchProductsAndCategories() {
+            const productsContainer = document.getElementById('home-products');
+            productsContainer.innerHTML = generateSkeletonLoaders(); // Show skeleton loaders immediately
+
+            try {
+                // Check network status before fetching
+                if (!navigator.onLine) {
+                    showNetworkStatus(true);
+                    productsContainer.innerHTML = '<p style="text-align:center; color: #ef4444; padding: 20px;">আপনি অফলাইনে আছেন। ইন্টারনেট সংযোগ পরীক্ষা করুন।</p>';
+                    return;
+                } else {
+                    showNetworkStatus(false);
+                }
+
+                const categoriesQuery = query(collection(db, "categories"), orderBy("name"));
+                const productsQuery = query(collection(db, "products"), orderBy("createdAt", "desc"));
+
+                const [categoriesSnapshot, productsSnapshot] = await Promise.all([
+                    getDocs(categoriesQuery),
+                    getDocs(productsQuery)
+                ]);
+
+                allProducts = [];
+                productsSnapshot.forEach(doc => allProducts.push({ id: doc.id, ...doc.data() }));
+
+                allCategories = [];
+                categoriesSnapshot.forEach(doc => allCategories.push({ id: doc.id, ...doc.data() }));
+
+                renderCategoryFilter();
+                renderProducts(); // Initial render with 'All' category
+                createDots(); // Initialize slider dots after slides are set up (if dynamic)
+
+                // Observe elements for fade-in animation
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-in');
+                            observer.unobserve(entry.target); // Stop observing once animated
+                        }
+                    });
+                }, { threshold: 0.1 }); // Trigger when 10% of the item is visible
+
+                document.querySelectorAll('.category-section').forEach(section => {
+                    observer.observe(section);
+                });
+
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+                productsContainer.innerHTML = '<p style="text-align:center; color: #ef4444; padding: 20px;">পণ্য লোড করতে ব্যর্থ। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন অথবা Firebase সেটআপ দেখুন।</p>';
+                showNetworkStatus(true, 'পণ্য লোড করতে সমস্যা হয়েছে।');
+            }
+        }
+
+        function renderCategoryFilter() {
+            const categoryFilterDiv = document.getElementById('categoryFilter');
+            let chipsHtml = `<span class="category-chip ${currentActiveCategory === 'All' ? 'active' : ''}" data-category="All" onclick="filterProducts('All')">সব</span>`;
+
+            allCategories.forEach(category => {
+                chipsHtml += `<span class="category-chip ${currentActiveCategory === category.name ? 'active' : ''}" data-category="${category.name}" onclick="filterProducts('${category.name}')">${category.name}</span>`;
+            });
+            categoryFilterDiv.innerHTML = chipsHtml;
+        }
+
+        function filterProducts(categoryName) {
+            currentActiveCategory = categoryName;
+            renderProducts();
+
+            // Update active state of category chips
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.category === categoryName);
+            });
+        }
+
+        function renderProducts() {
+            const productsContainer = document.getElementById('home-products');
+            productsContainer.innerHTML = ''; // Clear existing products
+
+            const categoriesToShow = currentActiveCategory === 'All' ? allCategories.map(c => c.name) : [currentActiveCategory];
+
+            categoriesToShow.forEach(categoryName => {
+                const productsInCategory = allProducts.filter(p => p.category === categoryName);
+
+                if (productsInCategory.length > 0) {
+                    const section = document.createElement('div');
+                    section.className = 'category-section'; // Initially no animate-in class
+                    section.innerHTML = `
+                        <h2 class="category-title">${categoryName.toUpperCase()}</h2>
+                        <div class="product-scroll">
+                            ${productsInCategory.map(product => `
+                                <div class="product-card interactive">
+                                    <div class="img-container" onclick="navigateToDetails('${product.id}')">
+                                        <img src="${product.imageUrls[0]}" alt="${product.name}">
+                                    </div>
+                                    <div class="product-info">
+                                        <h3>${product.name}</h3>
+                                        <p>৳${product.price.toLocaleString()}</p>
+                                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCartFromCard('${product.id}')">
+                                            <i class="ri-add-line"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                    productsContainer.appendChild(section);
+                }
+            });
+
+            // Re-observe elements for fade-in animation on new render
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.category-section').forEach(section => {
+                observer.observe(section);
+            });
+        }
+
+        function generateSkeletonLoaders() {
+            let skeletonHtml = '';
+            for (let i = 0; i < 2; i++) { // Generate 2 skeleton sections
+                skeletonHtml += `
+                    <div class="skeleton-section">
+                        <div class="skeleton-title"></div>
+                        <div class="product-scroll skeleton-scroll">
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                        </div>
+                    </div>`;
+            }
+            return skeletonHtml;
+        }
+
+
+        // --- Cart Logic ---
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = cart.length;
+                badge.classList.toggle('visible', cart.length > 0);
+            }
+        }
+
+        function addToCart(product, selectedSize) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            // Check if product with same ID and SIZE already exists
+            const existingItem = cart.find(item => item.id === product.id && item.size === selectedSize);
+
+            if (existingItem) {
+                // If exists, increment quantity (if you track quantity) or just ignore for unique items
+                // For this example, we'll just add it as a new line item if size is selected, or prevent duplicate
+                alert('এই পণ্যটি এই সাইজে ইতিমধ্যেই আপনার কার্টে আছে।');
+                return;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.imageUrls[0], // Assuming first image is primary
+                    size: selectedSize || 'N/A'
+                });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            animateCartIcon();
+            alert(`${product.name} (Size: ${selectedSize || 'N/A'}) আপনার কার্টে যোগ করা হয়েছে!`);
+        }
+        
+        function animateCartIcon() {
+            const cartIcon = document.getElementById('cartBagIcon');
+            cartIcon.classList.add('cart-added-animation');
+            setTimeout(() => {
+                cartIcon.classList.remove('cart-added-animation');
+            }, 600); // Animation duration
+        }
+
+        // --- Quick View Modal Logic ---
+        const quickViewModal = document.getElementById('quickViewModal');
+        const modalProductImage = document.getElementById('modalProductImage');
+        const modalProductName = document.getElementById('modalProductName');
+        const modalProductPrice = document.getElementById('modalProductPrice');
+        const modalProductDescription = document.getElementById('modalProductDescription');
+        const modalSizeOptions = document.getElementById('modalSizeOptions');
+        const modalSizeSelectionDiv = document.getElementById('modalSizeSelection');
+
+
+        function openQuickViewModal(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            currentModalProduct = product;
+            selectedProductSize = null; // Reset selected size
+
+            modalProductImage.src = product.imageUrls[0];
+            modalProductName.textContent = product.name;
+            modalProductPrice.textContent = `৳${product.price.toLocaleString()}`;
+            modalProductDescription.textContent = product.description || 'No description available.';
+
+            // Render sizes
+            modalSizeOptions.innerHTML = '';
+            if (product.sizes && product.sizes.length > 0) {
+                modalSizeSelectionDiv.style.display = 'block';
+                product.sizes.forEach(size => {
+                    const sizeOption = document.createElement('span');
+                    sizeOption.classList.add('size-option');
+                    sizeOption.textContent = size;
+                    sizeOption.addEventListener('click', () => {
+                        document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
+                        sizeOption.classList.add('selected');
+                        selectedProductSize = size;
+                    });
+                    modalSizeOptions.appendChild(sizeOption);
+                });
+            } else {
+                modalSizeSelectionDiv.style.display = 'none'; // Hide size selection if no sizes
+            }
+
+            quickViewModal.classList.add('show');
+        }
+
+        function closeQuickViewModal() {
+            quickViewModal.classList.remove('show');
+            currentModalProduct = null;
+            selectedProductSize = null;
+        }
+
+        function addCurrentProductToCart() {
+            if (!currentModalProduct) return;
+
+            if (currentModalProduct.sizes && currentModalProduct.sizes.length > 0 && !selectedProductSize) {
+                alert('দয়া করে একটি সাইজ নির্বাচন করুন।');
+                return;
+            }
+            addToCart(currentModalProduct, selectedProductSize);
+            closeQuickViewModal();
+        }
+
+        function addToCartFromCard(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            // If product has sizes, force open modal
+            if (product.sizes && product.sizes.length > 0) {
+                openQuickViewModal(productId);
+            } else {
+                // If no sizes, add directly with 'N/A' size
+                addToCart(product, 'N/A');
+            }
+        }
+
+        // --- Search Bar Focus Animation ---
+        const searchBar = document.getElementById('searchBar');
+        searchBar.querySelector('input').addEventListener('focus', () => {
+            searchBar.classList.add('focused');
+        });
+        searchBar.querySelector('input').addEventListener('blur', () => {
+            searchBar.classList.remove('focused');
+        });
+
+        // --- Scroll to Top Button Logic ---
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        function scrollFunction() {
+            if (document.getElementById('appContainer').scrollTop > 200) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        }
+        function scrollToTop() {
+            document.getElementById('appContainer').scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        document.getElementById('appContainer').addEventListener('scroll', scrollFunction);
+
+        // --- Network Status Logic ---
+        const networkStatusDiv = document.getElementById('network-status');
+        function showNetworkStatus(isOffline, message = 'You are currently offline. Please check your internet connection.') {
+            if (isOffline) {
+                networkStatusDiv.textContent = message;
+                networkStatusDiv.classList.add('show');
+            } else {
+                networkStatusDiv.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            showNetworkStatus(false);
+            fetchProductsAndCategories(); // Re-fetch data when back online
+        });
+        window.addEventListener('offline', () => showNetworkStatus(true));
+
+
+        // --- Initialize on DOM Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProductsAndCategories();
+            updateCartBadge();
+            createDots(); // Initialize dots for slider
+            showSlide(slideIndex); // Show initial slide
+        });
+
+        // Make functions globally accessible for onclick attributes
+        window.navigateToDetails = (productId) => {
+            window.location.href = `./details.html?id=${productId}`;
+        };
+        window.filterProducts = filterProducts;
+        window.openQuickViewModal = openQuickViewModal;
+        window.closeQuickViewModal = closeQuickViewModal;
+        window.addCurrentProductToCart = addCurrentProductToCart;
+        window.addToCartFromCard = addToCartFromCard;
+        window.scrollToTop = scrollToTop;
+    </script>
+</body>
+</html>
