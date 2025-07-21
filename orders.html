@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f4f7fe; --primary: #4a69bd; --text: #333; --card-bg: #fff; --shadow: rgba(0, 0, 0, 0.05) 0px 5px 15px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+        .header { display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .header a:hover { text-decoration: underline; }
+
+        .table-container { overflow-x: auto; background: var(--card-bg); box-shadow: var(--shadow); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; /* Ensures table is not too narrow */ }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+        th { background-color: #f9fafb; font-size: 14px; text-transform: uppercase; color: #666; font-weight: 700; }
+        
+        td .customer-info b { display: block; font-size: 15px; color: var(--text); }
+        td .customer-info small { color: #888; font-size: 13px; }
+
+        td .order-items ul { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+        td .order-items li { margin-bottom: 5px; color: #555; }
+        td .order-items li:last-child { margin-bottom: 0; }
+
+        td .status { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; text-transform: capitalize; display: inline-block; }
+        .status.pending { background-color: #fffbeb; color: #f59e0b; border: 1px solid #f59e0b; }
+        .status.shipped { background-color: #e0f2fe; color: #3b82f6; border: 1px solid #3b82f6; }
+        .status.delivered { background-color: #dcfce7; color: #22c55e; border: 1px solid #22c55e; }
+        .status.cancelled { background-color: #fee2e2; color: #ef4444; border: 1px solid #ef4444; }
+
+        .status-dropdown {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease;
+        }
+        .status-dropdown:focus { border-color: var(--primary); }
+
+        .total-amount { font-weight: 700; color: var(--primary); font-size: 16px; }
+
+        .no-orders { text-align: center; padding: 30px; font-size: 18px; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="ri-shopping-bag-line"></i> All Orders</h1>
+            <a href="./admin.html"><i class="ri-dashboard-line"></i> Back to Dashboard</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Info</th>
+                        <th>Date & Time</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Payment Method</th>
+                        <th>Order Notes</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                    <tr><td colspan="8" class="no-orders">Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+          authDomain: "store-2b78c.firebaseapp.com",
+          projectId: "store-2b78c",
+          storageBucket: "store-2b78c.firebasestorage.app",
+          messagingSenderId: "680525107505",
+          appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchOrders() {
+            const tableBody = document.getElementById('orders-table-body');
+            tableBody.innerHTML = '<tr><td colspan="8" class="no-orders">Loading orders...</td></tr>'; // Added more cols
+
+            try {
+                const q = query(collection(db, "orders"), orderBy("orderDate", "desc"));
+                const querySnapshot = await getDocs(q);
+                let html = '';
+                if (querySnapshot.empty) {
+                    html = '<tr><td colspan="8" class="no-orders">No orders found.</td></tr>';
+                } else {
+                    querySnapshot.forEach(docSnapshot => {
+                        const order = docSnapshot.data();
+                        const orderId = docSnapshot.id;
+                        const orderDate = order.orderDate ? new Date(order.orderDate.seconds * 1000).toLocaleString() : 'N/A';
+                        
+                        const itemsList = order.items && order.items.length > 0 ? 
+                                order.items.map(item => `${item.name} (Size: ${item.size || 'N/A'}, Qty: ${item.quantity || 1}) - ৳${item.price.toLocaleString()}`).join('<br>') : 
+                                'No items';
+
+                        html += `
+                            <tr>
+                                <td>${orderId.substring(0, 8)}...</td>
+                                <td class="customer-info">
+                                    <b>${order.customer.name || 'N/A'}</b><br>
+                                    <small>${order.customer.address || 'N/A'}</small><br>
+                                    <small>Phone: ${order.customer.phone || 'N/A'}</small>
+                                </td>
+                                <td>${orderDate}</td>
+                                <td class="order-items">
+                                    <ul><li>${itemsList.replace(/<br>/g, '</li><li>')}</li></ul>
+                                </td>
+                                <td class="total-amount">৳${(order.totalAmount || 0).toLocaleString()}</td>
+                                <td>${order.paymentMethod || 'N/A'}</td>
+                                <td><small>${order.orderNotes || 'N/A'}</small></td>
+                                <td>
+                                    <select class="status-dropdown" data-order-id="${orderId}" onchange="updateOrderStatus(this)">
+                                        <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                        <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                tableBody.innerHTML = html;
+            } catch (error) {
+                console.error("Error fetching orders: ", error);
+                tableBody.innerHTML = '<tr><td colspan="8" class="no-orders">Error loading orders. Please try again.</td></tr>';
+            }
+        }
+
+        async function updateOrderStatus(selectElement) {
+            const orderId = selectElement.dataset.orderId;
+            const newStatus = selectElement.value;
+            
+            try {
+                const orderRef = doc(db, "orders", orderId);
+                await updateDoc(orderRef, {
+                    status: newStatus
+                });
+                alert(`Order ${orderId.substring(0, 8)}... status updated to ${newStatus}.`);
+                // Optionally re-fetch orders to update the view, or just update the class for the row
+                // For simplicity, we'll just update the class directly for the dropdown's parent td
+                const statusCell = selectElement.closest('td');
+                statusCell.querySelector('.status-dropdown').className = `status-dropdown`; // Reset class
+                // No direct class for the select, but if you want to visually change it:
+                // statusCell.style.backgroundColor = getStatusColor(newStatus); // Example, need to define getStatusColor
+            } catch (error) {
+                console.error("Error updating order status: ", error);
+                alert('Failed to update order status. Please try again.');
+            }
+        }
+
+        // Helper to get status color (optional, for visual feedback)
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Pending': return '#fffbeb';
+                case 'Shipped': return '#e0f2fe';
+                case 'Delivered': return '#dcfce7';
+                case 'Cancelled': return '#fee2e2';
+                default: return '#f9fafb';
+            }
+        }
+
+
+        window.onload = fetchOrders;
+        window.updateOrderStatus = updateOrderStatus; // Make available globally for onchange
+    </script>
+</body>
+</html>

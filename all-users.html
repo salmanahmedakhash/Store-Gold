@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f4f7fe; --primary: #4a69bd; --text: #333; --card-bg: #fff; --shadow: rgba(0, 0, 0, 0.05) 0px 5px 15px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+        .header { display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); box-shadow: var(--shadow); border-radius: 8px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .status { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+        .status.active { background-color: #dcfce7; color: #22c55e; }
+        .status.suspended { background-color: #fee2e2; color: #ef4444; }
+        .actions button { width: auto; font-size: 14px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>All Users</h1><a href="./admin.html"><i class="ri-arrow-left-line"></i> Back to Dashboard</a></div>
+        <table>
+            <thead><tr><th>User ID</th><th>Name</th><th>Email</th><th>Join Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="users-table-body"></tbody>
+        </table>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+  authDomain: "store-2b78c.firebaseapp.com",
+  projectId: "store-2b78c",
+  storageBucket: "store-2b78c.firebasestorage.app",
+  messagingSenderId: "680525107505",
+  appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchUsers() {
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                let html = '';
+                querySnapshot.forEach(doc => {
+                    const user = doc.data();
+                    const joinDate = user.joinDate ? new Date(user.joinDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                    html += `
+                        <tr>
+                            <td>${doc.id.substring(0, 8)}...</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${joinDate}</td>
+                            <td><span class="status ${user.status.toLowerCase()}">${user.status}</span></td>
+                            <td class="actions">
+                                <button onclick="toggleUserStatus('${doc.id}', '${user.status}')">
+                                    ${user.status === 'Active' ? 'Suspend' : 'Activate'}
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+                tableBody.innerHTML = html || '<tr><td colspan="6">No users found.</td></tr>';
+            } catch (error) { console.error("Error fetching users: ", error); }
+        }
+
+        window.toggleUserStatus = async (id, currentStatus) => {
+            const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+            if (confirm(`Are you sure you want to ${newStatus.toLowerCase()} this user?`)) {
+                const userDocRef = doc(db, "users", id);
+                try {
+                    await updateDoc(userDocRef, { status: newStatus });
+                    fetchUsers();
+                } catch (error) { alert('Failed to update status.'); }
+            }
+        }
+        window.onload = fetchUsers;
+    </script>
+</body>
+</html>

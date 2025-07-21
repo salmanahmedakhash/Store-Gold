@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f4f7fe; --primary: #4a69bd; --text: #333; --card-bg: #fff; --shadow: rgba(0, 0, 0, 0.05) 0px 5px 15px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+        header h1 { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background-color: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: var(--shadow); }
+        .stat-card .icon { font-size: 28px; color: var(--primary); margin-bottom: 15px; }
+        .stat-card h3 { font-size: 32px; font-weight: 700; }
+        .stat-card p { color: #777; }
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .nav-card { background-color: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: var(--shadow); text-decoration: none; color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s; }
+        .nav-card:hover { transform: translateY(-5px); box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 20px; }
+        .nav-card .icon { font-size: 42px; color: var(--primary); margin-bottom: 20px; }
+        .nav-card h2 { font-size: 18px; font-weight: 600; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><h1>Admin Dashboard</h1></header>
+        <section class="stats-grid">
+            <div class="stat-card"><div class="icon"><i class="ri-shopping-cart-2-fill"></i></div><h3 id="total-orders">0</h3><p>Total Orders</p></div>
+            <div class="stat-card"><div class="icon"><i class="ri-t-shirt-2-fill"></i></div><h3 id="total-products">0</h3><p>Total Products</p></div>
+            <div class="stat-card"><div class="icon"><i class="ri-group-fill"></i></div><h3 id="total-users">0</h3><p>Total Users</p></div>
+            <div class="stat-card"><div class="icon"><i class="ri-line-chart-fill"></i></div><h3 id="total-sales">৳0</h3><p>Total Sales</p></div>
+        </section>
+        <nav class="nav-grid">
+            <a href="./orders.html" class="nav-card"><div class="icon"><i class="ri-file-list-3-fill"></i></div><h2>Manage Orders</h2></a>
+            <a href="./products.html" class="nav-card"><div class="icon"><i class="ri-add-box-fill"></i></div><h2>Products</h2></a>
+            <a href="./categories.html" class="nav-card"><div class="icon"><i class="ri-function-fill"></i></div><h2>Categories</h2></a>
+            <a href="./all-users.html" class="nav-card"><div class="icon"><i class="ri-user-settings-fill"></i></div><h2>Manage Users</h2></a>
+            <a href="./top-products.html" class="nav-card"><div class="icon"><i class="ri-trophy-fill"></i></div><h2>Top Products</h2></a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // আপনার Firebase প্রজেক্টের কনফিগারেশন এখানে পেস্ট করুন
+        const firebaseConfig = {
+  apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+  authDomain: "store-2b78c.firebaseapp.com",
+  projectId: "store-2b78c",
+  storageBucket: "store-2b78c.firebasestorage.app",
+  messagingSenderId: "680525107505",
+  appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchStats() {
+            try {
+                const [ordersSnapshot, productsSnapshot, usersSnapshot] = await Promise.all([
+                    getDocs(collection(db, "orders")),
+                    getDocs(collection(db, "products")),
+                    getDocs(collection(db, "users"))
+                ]);
+
+                document.getElementById('total-orders').textContent = ordersSnapshot.size;
+                document.getElementById('total-products').textContent = productsSnapshot.size;
+                document.getElementById('total-users').textContent = usersSnapshot.size;
+
+                let totalSales = 0;
+                ordersSnapshot.forEach(doc => { totalSales += doc.data().totalAmount; });
+                document.getElementById('total-sales').textContent = `৳${totalSales.toLocaleString()}`;
+            } catch (error) { console.error("Error fetching stats: ", error); }
+        }
+        window.onload = fetchStats;
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f4f7fe; --primary: #4a69bd; --text: #333; --card-bg: #fff; --shadow: rgba(0, 0, 0, 0.05) 0px 5px 15px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); }
+        .container { max-width: 800px; margin: 30px auto; padding: 20px; }
+        .header { display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px; }
+        .form-container { background: var(--card-bg); padding: 25px; border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; }
+        .input-group input { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        button { background: var(--primary); color: #fff; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .category-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 10px; }
+        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>Manage Categories</h1><a href="./admin.html"><i class="ri-arrow-left-line"></i> Back</a></div>
+        <div class="form-container">
+            <form id="add-category-form">
+                <div class="input-group">
+                    <input type="text" id="category-name" placeholder="New category name" required>
+                    <button type="submit">Add Category</button>
+                </div>
+            </form>
+        </div>
+        <div id="category-list"></div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyD_W3EolgXVICoaNk7xLXL-ajScOnlCfPk",
+  authDomain: "store-2b78c.firebaseapp.com",
+  projectId: "store-2b78c",
+  storageBucket: "store-2b78c.firebasestorage.app",
+  messagingSenderId: "680525107505",
+  appId: "1:680525107505:web:7d6ad1254e0a5598cf2010"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchCategories() {
+            const listContainer = document.getElementById('category-list');
+            listContainer.innerHTML = 'Loading...';
+            const querySnapshot = await getDocs(collection(db, "categories"));
+            let html = '';
+            querySnapshot.forEach(doc => {
+                const category = doc.data();
+                html += `
+                    <div class="category-list-item">
+                        <span>${category.name}</span>
+                        <button class="btn-delete" onclick="deleteCategory('${doc.id}')">Delete</button>
+                    </div>`;
+            });
+            listContainer.innerHTML = html || '<p>No categories found.</p>';
+        }
+
+        document.getElementById('add-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('category-name').value.trim();
+            if (!name) return;
+            try {
+                await addDoc(collection(db, "categories"), { name });
+                e.target.reset();
+                fetchCategories();
+            } catch (error) { alert('Error adding category.'); }
+        });
+
+        window.deleteCategory = async (id) => {
+            if (confirm('Are you sure?')) {
+                try {
+                    await deleteDoc(doc(db, "categories", id));
+                    fetchCategories();
+                } catch (error) { alert('Error deleting category.'); }
+            }
+        }
+        window.onload = fetchCategories;
+    </script>
+</body>
+</html>
